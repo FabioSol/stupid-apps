@@ -5,6 +5,7 @@ import type { ComponentType } from 'react'
 export type AppCategory =
   | 'Encoding & Crypto'
   | 'Text'
+  | 'Art'
   | 'Generators'
   | 'Time'
   | 'Calculators'

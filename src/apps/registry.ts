@@ -22,6 +22,7 @@ export function getApp(id: string): StupidApp | undefined {
 export const categoryOrder: StupidApp['category'][] = [
   'Encoding & Crypto',
   'Text',
+  'Art',
   'Generators',
   'Time',
   'Calculators',
