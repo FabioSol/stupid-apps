@@ -5,8 +5,8 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // Served from https://fabiosol.github.io/stupid-apps/ on GitHub Pages.
-  base: '/stupid-apps/',
+  // Served from the root of the custom domain https://stupid-apps.fabiosol.com/.
+  base: '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

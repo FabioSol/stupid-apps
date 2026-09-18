@@ -77,8 +77,11 @@ src/
 
 ## Deployment notes
 
-- Vite `base` is `/stupid-apps/` (project page). If the repo is renamed, update
-  `base` in `vite.config.ts` and the `basename` picks it up via
-  `import.meta.env.BASE_URL`.
+- Served from the custom domain **https://stupid-apps.fabiosol.com/** (a CNAME
+  DNS record points the subdomain at `fabiosol.github.io`). Because it's a
+  custom domain the app is at the site root, so Vite `base` is `/`.
+- `public/CNAME` holds the custom domain and Vite copies it into `dist/` on
+  every build — this is what keeps the domain configured for Actions-based
+  deploys (don't remove it).
 - The workflow copies `dist/index.html` → `dist/404.html` so client-side deep
   links resolve on a hard refresh.
