@@ -1,6 +1,11 @@
 import { scaleTransform, type Transform } from '@/lib/image-stage/transform'
 import { buildPalette, mapToIndices, type Rgb } from './quantize'
-import { connectedComponents, denoise, type Region } from './regions'
+import {
+  connectedComponents,
+  denoise,
+  mergeSmallRegions,
+  type Region,
+} from './regions'
 
 /** Longest edge (px) of the internal processing canvas. */
 export const PROCESS_LONG_EDGE = 1000
@@ -48,16 +53,35 @@ export interface PbnResult {
   height: number
 }
 
-/** Quantize → denoise → segment. Palette-building is the slow part. */
-export function processImage(
-  raster: ImageData,
-  numColors: number,
-  denoisePasses = 2,
-): PbnResult {
+export interface PbnOptions {
+  numColors: number
+  /** Tone regularization strength, 0 (linear) → 1 (strong). */
+  regularization: number
+  /** Smoothing amount, 0 → 1. Drives denoise passes and small-region merging. */
+  smoothing: number
+}
+
+/**
+ * Full pipeline: quantize (tone-regularized) → denoise → segment → merge tiny
+ * regions → smooth once more → segment for final regions.
+ */
+export function processImage(raster: ImageData, opts: PbnOptions): PbnResult {
   const { data, width, height } = raster
-  const palette = buildPalette(data, numColors)
-  const raw = mapToIndices(data, palette)
-  const indices = denoise(raw, width, height, palette.length, denoisePasses)
+  const { numColors, regularization, smoothing } = opts
+
+  const passes = 1 + Math.round(smoothing * 4) // 1 → 5
+  const minAreaFrac = smoothing * 0.006 // up to 0.6% of the image
+  const minArea = Math.max(1, Math.floor(minAreaFrac * width * height))
+
+  const { palette, centroids } = buildPalette(data, numColors, regularization)
+  const raw = mapToIndices(data, centroids, regularization)
+
+  let indices = denoise(raw, width, height, palette.length, passes)
+  const first = connectedComponents(indices, width, height)
+  indices = mergeSmallRegions(first.labels, first.regions, width, height, minArea)
+  // A final light majority pass smooths the merged boundaries.
+  indices = denoise(indices, width, height, palette.length, 1)
+
   const { regions } = connectedComponents(indices, width, height)
   return { palette, indices, regions, width, height }
 }

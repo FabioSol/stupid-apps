@@ -22,6 +22,8 @@ function PaintByNumbers() {
   const [orientation, setOrientation] = useState<Orientation>('portrait')
   const [phase, setPhase] = useState<'edit' | 'result'>('edit')
   const [numColors, setNumColors] = useState(12)
+  const [smoothing, setSmoothing] = useState(40)
+  const [regularization, setRegularization] = useState(40)
   const [result, setResult] = useState<PbnResult | null>(null)
   const [busy, setBusy] = useState(false)
   const [tab, setTab] = useState<'outline' | 'preview'>('outline')
@@ -73,16 +75,22 @@ function PaintByNumbers() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src, paperId, orientation, stageW])
 
-  // Re-quantize when the color count changes in the result view.
+  // Re-process when any generation parameter changes in the result view.
   useEffect(() => {
     if (phase !== 'result' || !rasterRef.current) return
     setBusy(true)
     const id = setTimeout(() => {
-      setResult(processImage(rasterRef.current!, numColors))
+      setResult(
+        processImage(rasterRef.current!, {
+          numColors,
+          smoothing: smoothing / 100,
+          regularization: regularization / 100,
+        }),
+      )
       setBusy(false)
     }, 10)
     return () => clearTimeout(id)
-  }, [numColors, phase])
+  }, [numColors, smoothing, regularization, phase])
 
   // Draw whenever a result is ready.
   useEffect(() => {
@@ -122,7 +130,13 @@ function PaintByNumbers() {
     setBusy(true)
     setPhase('result')
     setTimeout(() => {
-      setResult(processImage(raster, numColors))
+      setResult(
+        processImage(raster, {
+          numColors,
+          smoothing: smoothing / 100,
+          regularization: regularization / 100,
+        }),
+      )
       setBusy(false)
     }, 10)
   }
@@ -227,8 +241,14 @@ function PaintByNumbers() {
             <canvas ref={previewRef} className={`mx-auto block h-auto max-w-full ${tab === 'preview' ? '' : 'hidden'}`} />
           </div>
 
-          <LabeledSlider label="Colors" value={numColors} min={4} max={24} unit=""
-            onChange={(v) => setNumColors(Math.round(v))} />
+          <div className="space-y-3">
+            <LabeledSlider label="Colors" value={numColors} min={4} max={24} unit=""
+              onChange={(v) => setNumColors(Math.round(v))} />
+            <LabeledSlider label="Smoothing" value={smoothing} min={0} max={100} unit="%"
+              onChange={setSmoothing} />
+            <LabeledSlider label="Even tones" value={regularization} min={0} max={100} unit="%"
+              onChange={setRegularization} />
+          </div>
 
           {result ? (
             <div className="flex flex-wrap gap-2">

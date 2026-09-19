@@ -110,3 +110,64 @@ export function connectedComponents(indices: Uint8Array, w: number, h: number) {
 
   return { labels, regions }
 }
+
+/**
+ * Merge regions smaller than `minArea` into their most-shared neighbor, so
+ * speckle disappears. Returns a new index map (small regions adopt the
+ * neighbor's color); re-run `connectedComponents` on it for final regions.
+ */
+export function mergeSmallRegions(
+  labels: Int32Array,
+  regions: Region[],
+  w: number,
+  h: number,
+  minArea: number,
+): Uint8Array {
+  // Shared-border counts between adjacent labels.
+  const adj: Map<number, number>[] = regions.map(() => new Map())
+  const bump = (a: number, b: number) => {
+    adj[a].set(b, (adj[a].get(b) ?? 0) + 1)
+    adj[b].set(a, (adj[b].get(a) ?? 0) + 1)
+  }
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = y * w + x
+      const la = labels[i]
+      if (x < w - 1 && labels[i + 1] !== la) bump(la, labels[i + 1])
+      if (y < h - 1 && labels[i + w] !== la) bump(la, labels[i + w])
+    }
+  }
+
+  // Union-find: point each small region at its dominant neighbor.
+  const parent = Int32Array.from({ length: regions.length }, (_, i) => i)
+  const find = (x: number): number => {
+    while (parent[x] !== x) {
+      parent[x] = parent[parent[x]]
+      x = parent[x]
+    }
+    return x
+  }
+
+  const order = regions
+    .map((r, i) => ({ i, area: r.area }))
+    .sort((a, b) => a.area - b.area)
+  for (const { i, area } of order) {
+    if (area >= minArea) continue
+    let bestNeighbor = -1
+    let bestBorder = -1
+    for (const [n, border] of adj[i]) {
+      if (find(n) === find(i)) continue
+      if (border > bestBorder) {
+        bestBorder = border
+        bestNeighbor = n
+      }
+    }
+    if (bestNeighbor >= 0) parent[find(i)] = find(bestNeighbor)
+  }
+
+  const out = new Uint8Array(labels.length)
+  for (let p = 0; p < labels.length; p++) {
+    out[p] = regions[find(labels[p])].colorIndex
+  }
+  return out
+}
