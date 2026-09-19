@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf'
-import { toHex, type Rgb } from './quantize'
+import { toHex, type Rgb } from './color-space'
 import { orientedSize, type Orientation, type PaperSize } from './paper-sizes'
 
 export function downloadCanvas(canvas: HTMLCanvasElement, filename: string) {

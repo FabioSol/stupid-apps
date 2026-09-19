@@ -1,4 +1,4 @@
-import type { Rgb } from './quantize'
+import type { Rgb } from './color-space'
 import type { Region } from './regions'
 
 /** Paint each pixel with its palette color — a posterized preview. */

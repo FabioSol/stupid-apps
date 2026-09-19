@@ -7,11 +7,27 @@ export interface Region {
   height: number
 }
 
-/**
- * Majority (mode) filter over a 3×3 neighborhood, run `passes` times. Removes
- * salt-and-pepper speckle so we get clean, paintable regions instead of noise.
- */
-export function denoise(
+/** Nearest-neighbor upscale of an index map to a larger canvas. */
+export function upscaleNearest(
+  indices: Uint8Array,
+  w: number,
+  h: number,
+  W: number,
+  H: number,
+): Uint8Array {
+  const out = new Uint8Array(W * H)
+  for (let y = 0; y < H; y++) {
+    const sy = Math.min(h - 1, Math.floor((y * h) / H))
+    for (let x = 0; x < W; x++) {
+      const sx = Math.min(w - 1, Math.floor((x * w) / W))
+      out[y * W + x] = indices[sy * w + sx]
+    }
+  }
+  return out
+}
+
+/** Majority (mode) filter over a 3×3 neighborhood — rounds blocky staircases. */
+export function majoritySmooth(
   indices: Uint8Array,
   w: number,
   h: number,

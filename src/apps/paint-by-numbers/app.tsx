@@ -8,11 +8,12 @@ import { Slider } from '@/components/ui/slider'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toCssMatrix } from '@/lib/image-stage/transform'
 import { useGesture } from '@/lib/image-stage/use-gesture'
+import { toHex } from './color-space'
 import { downloadCanvas, exportPdf } from './export'
-import { outputPixels, processImage, rasterizeCrop, type PbnResult } from './generate'
+import { outputPixels, rasterizeCrop } from './generate'
 import { aspectOf, PAPER_SIZES, type Orientation } from './paper-sizes'
-import { toHex } from './quantize'
 import { renderOutline, renderPreview } from './render'
+import { usePbnWorker } from './use-pbn-worker'
 
 const STAGE_MAX_H = 460
 
@@ -24,9 +25,9 @@ function PaintByNumbers() {
   const [numColors, setNumColors] = useState(12)
   const [smoothing, setSmoothing] = useState(40)
   const [regularization, setRegularization] = useState(40)
-  const [result, setResult] = useState<PbnResult | null>(null)
-  const [busy, setBusy] = useState(false)
   const [tab, setTab] = useState<'outline' | 'preview'>('outline')
+
+  const { result, busy, run } = usePbnWorker()
 
   const fileRef = useRef<HTMLInputElement>(null)
   const imgRef = useRef<HTMLImageElement>(null)
@@ -75,21 +76,15 @@ function PaintByNumbers() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src, paperId, orientation, stageW])
 
-  // Re-process when any generation parameter changes in the result view.
+  // Re-process (in the worker) when any parameter changes in the result view.
   useEffect(() => {
     if (phase !== 'result' || !rasterRef.current) return
-    setBusy(true)
-    const id = setTimeout(() => {
-      setResult(
-        processImage(rasterRef.current!, {
-          numColors,
-          smoothing: smoothing / 100,
-          regularization: regularization / 100,
-        }),
-      )
-      setBusy(false)
-    }, 10)
-    return () => clearTimeout(id)
+    run(rasterRef.current, {
+      numColors,
+      smoothing: smoothing / 100,
+      evenTones: regularization / 100,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [numColors, smoothing, regularization, phase])
 
   // Draw whenever a result is ready.
@@ -117,7 +112,6 @@ function PaintByNumbers() {
     fitKey.current = null
     setSrc(URL.createObjectURL(file))
     setPhase('edit')
-    setResult(null)
     e.target.value = ''
   }
 
@@ -127,18 +121,12 @@ function PaintByNumbers() {
     const { w, h } = outputPixels(aspect)
     const raster = rasterizeCrop(img, g.transform, stageSize.current.w, w, h)
     rasterRef.current = raster
-    setBusy(true)
     setPhase('result')
-    setTimeout(() => {
-      setResult(
-        processImage(raster, {
-          numColors,
-          smoothing: smoothing / 100,
-          regularization: regularization / 100,
-        }),
-      )
-      setBusy(false)
-    }, 10)
+    run(raster, {
+      numColors,
+      smoothing: smoothing / 100,
+      evenTones: regularization / 100,
+    })
   }
 
   if (!src) {
