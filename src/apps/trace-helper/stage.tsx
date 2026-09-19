@@ -37,7 +37,6 @@ export function StageContent({
           style={{
             transform: toCssMatrix(transform),
             transformOrigin: 'center',
-            willChange: 'transform',
           }}
         />
       </div>

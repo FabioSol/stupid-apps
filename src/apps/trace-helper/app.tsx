@@ -144,7 +144,7 @@ function TraceHelper() {
           ref={g.containerRef}
           {...g.handlers}
           style={{ width: stageW || '100%', height: stageH || 320 }}
-          className="relative mx-auto touch-none select-none overflow-hidden rounded-xl border bg-muted shadow-inner"
+          className="relative isolate mx-auto touch-none select-none overflow-hidden rounded-xl border bg-muted shadow-inner"
         >
           <StageContent
             src={src}
@@ -187,7 +187,7 @@ function TraceHelper() {
               type="button"
               onClick={onUnlockTap}
               aria-label="Tap repeatedly to unlock"
-              className="fixed inset-0 z-[100] touch-none overflow-hidden overscroll-none bg-black"
+              className="fixed inset-0 z-[100] isolate touch-none overflow-hidden overscroll-none bg-black"
             >
               <StageContent
                 src={src}
