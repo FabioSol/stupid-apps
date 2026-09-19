@@ -2,7 +2,7 @@ interface GridOverlayProps {
   divisions: number
 }
 
-const LINE_PX = 2
+const LINE_PX = 1
 
 /**
  * An N×N grid fixed over the viewport (not the image), so proportions can be
