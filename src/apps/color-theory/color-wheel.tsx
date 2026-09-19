@@ -1,5 +1,5 @@
 import { useRef, type PointerEvent } from 'react'
-import type { Hsl } from './color'
+import { hslToHex, type Hsl } from './color'
 
 const SIZE = 240
 const RADIUS = SIZE / 2
@@ -69,8 +69,8 @@ export function ColorWheel({ value, onChange }: ColorWheelProps) {
       }}
     >
       <div
-        className="pointer-events-none absolute size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.4)]"
-        style={{ left: mx, top: my }}
+        className="pointer-events-none absolute size-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1.5px_rgba(0,0,0,0.5)]"
+        style={{ left: mx, top: my, backgroundColor: hslToHex(value) }}
       />
     </div>
   )
