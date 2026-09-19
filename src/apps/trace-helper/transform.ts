@@ -52,6 +52,15 @@ export function pivotTransform(
   }
 }
 
+/**
+ * Uniformly scales a transform by `f` (translation and scale alike). Used to
+ * blow the editor's mini-viewport framing up to the real viewport on freeze,
+ * so what you set is exactly what you get full-screen.
+ */
+export function scaleTransform(t: Transform, f: number): Transform {
+  return { x: t.x * f, y: t.y * f, scale: t.scale * f, rotation: t.rotation }
+}
+
 export function toCssMatrix(t: Transform): string {
   const deg = (t.rotation * 180) / Math.PI
   return `translate(${t.x}px, ${t.y}px) rotate(${deg}deg) scale(${t.scale})`
