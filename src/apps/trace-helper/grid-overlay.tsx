@@ -2,14 +2,16 @@ interface GridOverlayProps {
   divisions: number
 }
 
+const LINE_PX = 2
+
 /**
  * An N×N grid fixed over the viewport (not the image), so proportions can be
  * copied cell-by-cell however the reference is zoomed or rotated underneath.
  *
- * Lines are exactly 2px CSS divs (never scaled), blended with `difference`
- * against a white fill so each line paints the inverse of the pixel beneath
- * it — always visible, on any image. Edge lines are skipped so they don't
- * double up with the container border.
+ * Lines are exactly 2px, sized and stretched with inline styles (so they never
+ * depend on utility-class generation), blended with `difference` against a
+ * white fill so each line paints the inverse of the pixel beneath it. Edge
+ * lines are skipped so they don't double up with the container border.
  */
 export function GridOverlay({ divisions }: GridOverlayProps) {
   const ticks = Array.from(
@@ -25,15 +27,27 @@ export function GridOverlay({ divisions }: GridOverlayProps) {
       {ticks.map((p, i) => (
         <div
           key={`v${i}`}
-          className="absolute inset-y-0 w-0.5 bg-white"
-          style={{ left: `${p}%` }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: `${p}%`,
+            width: LINE_PX,
+            background: '#fff',
+          }}
         />
       ))}
       {ticks.map((p, i) => (
         <div
           key={`h${i}`}
-          className="absolute inset-x-0 h-0.5 bg-white"
-          style={{ top: `${p}%` }}
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: `${p}%`,
+            height: LINE_PX,
+            background: '#fff',
+          }}
         />
       ))}
     </div>
