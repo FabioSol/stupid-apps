@@ -1,5 +1,6 @@
 import { Frame, ImageUp, Lock } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { StupidApp } from '@/apps/types'
 import { Controls } from './controls'
 import { StageContent } from './stage'
@@ -63,6 +64,14 @@ function TraceHelper() {
 
   useEffect(() => () => { if (src) URL.revokeObjectURL(src) }, [src])
   useEffect(() => () => window.clearTimeout(tapTimer.current), [])
+
+  // Lock page scroll while frozen so a full-screen trace can't slide around.
+  useEffect(() => {
+    if (!frozen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [frozen])
 
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -174,37 +183,41 @@ function TraceHelper() {
         />
       )}
 
-      {/* Full-screen frozen view. */}
-      {frozen ? (
-        <button
-          type="button"
-          onClick={onUnlockTap}
-          aria-label="Tap repeatedly to unlock"
-          className="fixed inset-0 z-[60] overflow-hidden bg-black"
-        >
-          <StageContent
-            src={src}
-            transform={frozenTransform}
-            gridOn={gridOn}
-            divisions={divisions}
-            gridDark={gridDark}
-          />
-          <div className="pointer-events-none absolute inset-x-0 top-4 flex flex-col items-center gap-2">
-            <div className="flex items-center gap-2 rounded-full bg-background/85 px-4 py-2 text-sm font-medium shadow backdrop-blur">
-              <Lock className="size-4" />
-              Frozen — tap {UNLOCK_TAPS - taps} more to unlock
-            </div>
-            <div className="flex gap-1.5">
-              {Array.from({ length: UNLOCK_TAPS }).map((_, i) => (
-                <span
-                  key={i}
-                  className={`size-2.5 rounded-full ${i < taps ? 'bg-primary' : 'bg-white/60'}`}
-                />
-              ))}
-            </div>
-          </div>
-        </button>
-      ) : null}
+      {/* Full-screen frozen view, portalled to <body> so it covers the site
+          header and escapes any clipping/stacking context. */}
+      {frozen
+        ? createPortal(
+            <button
+              type="button"
+              onClick={onUnlockTap}
+              aria-label="Tap repeatedly to unlock"
+              className="fixed inset-0 z-[100] touch-none overflow-hidden overscroll-none bg-black"
+            >
+              <StageContent
+                src={src}
+                transform={frozenTransform}
+                gridOn={gridOn}
+                divisions={divisions}
+                gridDark={gridDark}
+              />
+              <div className="pointer-events-none absolute inset-x-0 top-4 flex flex-col items-center gap-2">
+                <div className="flex items-center gap-2 rounded-full bg-background/85 px-4 py-2 text-sm font-medium shadow backdrop-blur">
+                  <Lock className="size-4" />
+                  Frozen — tap {UNLOCK_TAPS - taps} more to unlock
+                </div>
+                <div className="flex gap-1.5">
+                  {Array.from({ length: UNLOCK_TAPS }).map((_, i) => (
+                    <span
+                      key={i}
+                      className={`size-2.5 rounded-full ${i < taps ? 'bg-primary' : 'bg-white/60'}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </button>,
+            document.body,
+          )
+        : null}
     </div>
   )
 }
