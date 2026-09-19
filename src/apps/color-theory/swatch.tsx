@@ -1,14 +1,21 @@
 import { useState } from 'react'
+import { cn } from '@/lib/utils'
 import { hslToHex, type Hsl } from './color'
+
+/** Pick black or white text so a hex label stays readable on the color. */
+export function readableText(color: Hsl): string {
+  return color.l > 58 ? '#111827' : '#ffffff'
+}
 
 interface SwatchProps {
   color: Hsl
-  /** Show the hex label under the chip. */
+  /** Print the hex on top of the color chip. */
   showHex?: boolean
+  className?: string
 }
 
 /** A color chip that copies its hex to the clipboard when clicked. */
-export function Swatch({ color, showHex = true }: SwatchProps) {
+export function Swatch({ color, showHex = true, className }: SwatchProps) {
   const hex = hslToHex(color)
   const [copied, setCopied] = useState(false)
 
@@ -23,22 +30,18 @@ export function Swatch({ color, showHex = true }: SwatchProps) {
       type="button"
       onClick={copy}
       title={`Copy ${hex}`}
-      className="group flex flex-col items-stretch gap-1 text-left"
+      style={{ backgroundColor: hex, color: readableText(color) }}
+      className={cn(
+        'flex h-16 w-full items-end justify-center rounded-md border p-1.5 font-mono text-[11px] font-medium uppercase transition-transform hover:scale-[1.04]',
+        className,
+      )}
     >
-      <span
-        className="h-12 w-full rounded-md border transition-transform group-hover:scale-[1.03]"
-        style={{ backgroundColor: hex }}
-      />
-      {showHex ? (
-        <span className="text-center font-mono text-xs text-muted-foreground">
-          {copied ? 'Copied!' : hex}
-        </span>
-      ) : null}
+      {showHex ? (copied ? 'Copied!' : hex) : null}
     </button>
   )
 }
 
-/** A labelled row of swatches (used for harmonies and tone ramps). */
+/** A labelled row of swatches (used for the tint / tone / shade ramps). */
 export function SwatchRow({ label, hint, colors }: {
   label: string
   hint?: string

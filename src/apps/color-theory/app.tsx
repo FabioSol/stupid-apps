@@ -16,7 +16,7 @@ import {
   type Hsl,
 } from './color'
 import { ColorWheel } from './color-wheel'
-import { Swatch, SwatchRow } from './swatch'
+import { readableText, Swatch, SwatchRow } from './swatch'
 
 function ColorTheory() {
   const [color, setColor] = useState<Hsl>({ h: 265, s: 70, l: 55 })
@@ -43,19 +43,20 @@ function ColorTheory() {
         <ColorWheel value={color} onChange={(hs) => setColor((c) => ({ ...c, ...hs }))} />
 
         <div className="w-full space-y-4">
-          <div className="flex items-center gap-3">
-            <span className="size-14 shrink-0 rounded-lg border" style={{ backgroundColor: hex }} />
-            <div className="space-y-1">
-              <Field label="Hex" className="w-40">
-                <Input
-                  value={hex}
-                  onChange={(e) => onHexInput(e.target.value)}
-                  className="font-mono uppercase"
-                />
-              </Field>
-              <p className="font-mono text-xs text-muted-foreground">{hslString(color)}</p>
-            </div>
+          <div
+            className="flex h-24 items-end justify-between rounded-lg border p-3 font-mono text-sm"
+            style={{ backgroundColor: hex, color: readableText(color) }}
+          >
+            <span className="uppercase">{hex}</span>
+            <span>{hslString(color)}</span>
           </div>
+          <Field label="Hex" className="w-40">
+            <Input
+              value={hex}
+              onChange={(e) => onHexInput(e.target.value)}
+              className="font-mono uppercase"
+            />
+          </Field>
 
           <div className="space-y-3">
             <SliderRow label="Hue" value={color.h} max={360} unit="°"
@@ -82,7 +83,7 @@ function ColorTheory() {
               <div className="flex gap-2">
                 {scheme.colors.map((c, i) => (
                   <div key={i} className="flex-1">
-                    <Swatch color={c} showHex={false} />
+                    <Swatch color={c} />
                   </div>
                 ))}
               </div>
