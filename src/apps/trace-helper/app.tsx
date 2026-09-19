@@ -4,8 +4,8 @@ import { createPortal } from 'react-dom'
 import type { StupidApp } from '@/apps/types'
 import { Controls } from './controls'
 import { StageContent } from './stage'
-import { scaleTransform } from './transform'
-import { useGesture } from './use-gesture'
+import { scaleTransform } from '@/lib/image-stage/transform'
+import { useGesture } from '@/lib/image-stage/use-gesture'
 
 const UNLOCK_TAPS = 5
 

@@ -1,6 +1,6 @@
 import type { Ref } from 'react'
 import { GridOverlay } from './grid-overlay'
-import { toCssMatrix, type Transform } from './transform'
+import { toCssMatrix, type Transform } from '@/lib/image-stage/transform'
 
 interface StageContentProps {
   src: string
