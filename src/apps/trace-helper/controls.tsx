@@ -6,7 +6,6 @@ import {
   Plus,
   RotateCcw,
   RotateCw,
-  Sun,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
@@ -16,14 +15,12 @@ export interface ControlsProps {
   rotationDeg: number
   divisions: number
   gridOn: boolean
-  gridDark: boolean
   onZoom: (factor: number) => void
   onRotate: (deltaDeg: number) => void
   onSetScale: (scale: number) => void
   onSetRotation: (deg: number) => void
   onDivisions: (n: number) => void
   onToggleGrid: () => void
-  onToggleGridColor: () => void
   onReset: () => void
   onReplace: () => void
   onFreeze: () => void
@@ -115,9 +112,6 @@ export function Controls(props: ControlsProps) {
             </span>
             <IconButton label="More divisions" onClick={() => props.onDivisions(props.divisions + 1)}>
               <Plus className="size-5" />
-            </IconButton>
-            <IconButton label="Grid color" onClick={props.onToggleGridColor}>
-              <Sun className="size-5" />
             </IconButton>
           </>
         ) : null}

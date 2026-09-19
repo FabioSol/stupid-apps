@@ -7,7 +7,6 @@ interface StageContentProps {
   transform: Transform
   gridOn: boolean
   divisions: number
-  gridDark: boolean
   imgRef?: Ref<HTMLImageElement>
   onImgLoad?: () => void
 }
@@ -22,7 +21,6 @@ export function StageContent({
   transform,
   gridOn,
   divisions,
-  gridDark,
   imgRef,
   onImgLoad,
 }: StageContentProps) {
@@ -43,7 +41,7 @@ export function StageContent({
           }}
         />
       </div>
-      {gridOn ? <GridOverlay divisions={divisions} dark={gridDark} /> : null}
+      {gridOn ? <GridOverlay divisions={divisions} /> : null}
     </>
   )
 }

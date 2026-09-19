@@ -42,7 +42,6 @@ function TraceHelper() {
   const [frozen, setFrozen] = useState(false)
   const [gridOn, setGridOn] = useState(true)
   const [divisions, setDivisions] = useState(4)
-  const [gridDark, setGridDark] = useState(false)
   const [taps, setTaps] = useState(0)
 
   const fileRef = useRef<HTMLInputElement>(null)
@@ -152,7 +151,6 @@ function TraceHelper() {
             transform={g.transform}
             gridOn={gridOn}
             divisions={divisions}
-            gridDark={gridDark}
             imgRef={imgRef}
             onImgLoad={onImgLoad}
           />
@@ -169,14 +167,12 @@ function TraceHelper() {
           rotationDeg={rotationDeg}
           divisions={divisions}
           gridOn={gridOn}
-          gridDark={gridDark}
           onZoom={g.zoomBy}
           onRotate={g.rotateBy}
           onSetScale={g.setScale}
           onSetRotation={g.setRotationDeg}
           onDivisions={(n) => setDivisions(Math.min(20, Math.max(2, n)))}
           onToggleGrid={() => setGridOn((v) => !v)}
-          onToggleGridColor={() => setGridDark((v) => !v)}
           onReset={fitToStage}
           onReplace={() => fileRef.current?.click()}
           onFreeze={() => { setFrozen(true); setTaps(0) }}
@@ -198,7 +194,6 @@ function TraceHelper() {
                 transform={frozenTransform}
                 gridOn={gridOn}
                 divisions={divisions}
-                gridDark={gridDark}
               />
               <div className="pointer-events-none absolute inset-x-0 top-4 flex flex-col items-center gap-2">
                 <div className="flex items-center gap-2 rounded-full bg-background/85 px-4 py-2 text-sm font-medium shadow backdrop-blur">
